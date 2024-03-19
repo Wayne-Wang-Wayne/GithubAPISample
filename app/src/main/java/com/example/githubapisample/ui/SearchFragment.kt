@@ -71,7 +71,7 @@ class SearchFragment : Fragment() {
                             }
                         }
                         StateType.ERROR -> {
-                            Toast.makeText(context, state.errorMessage, Toast.LENGTH_LONG).show()
+                            Toast.makeText(context, "有錯誤:" + state.errorMessage, Toast.LENGTH_LONG).show()
                             circularProgressBar?.visibility = View.GONE
                         }
                     }
