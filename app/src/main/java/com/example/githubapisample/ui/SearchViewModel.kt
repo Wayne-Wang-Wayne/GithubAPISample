@@ -1,6 +1,7 @@
 package com.example.githubapisample.ui
 
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.example.githubapisample.data.GithubRepository
 import com.example.githubapisample.data.remotedata.GitHubResponse
@@ -91,4 +92,8 @@ class SearchViewModel(
 enum class SearchDirection {
     TOP,
     BOTTOM
+}
+
+class SearchViewModelFactory(private val githubRepository: GithubRepository): ViewModelProvider.NewInstanceFactory() {
+    override fun <T : ViewModel> create(modelClass: Class<T>): T = SearchViewModel(githubRepository) as T
 }

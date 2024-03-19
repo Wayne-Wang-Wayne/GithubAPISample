@@ -13,7 +13,11 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.example.githubapisample.data.remotedata.GithubRepositoryImpl
+import com.example.githubapisample.data.remotedata.RetrofitInstance
 import com.example.githubapisample.databinding.FragmentSearchBinding
+import com.example.githubapisample.utils.GitHubApiDataMapperImpl
+import com.example.githubapisample.utils.TimeConverter
 import kotlinx.coroutines.launch
 
 
@@ -21,7 +25,12 @@ class SearchFragment : Fragment() {
 
     private var _binding: FragmentSearchBinding? = null
     private val binding get() = _binding
-    private val viewModel by viewModels<SearchViewModel>()
+    private val viewModel by viewModels<SearchViewModel> {
+        SearchViewModelFactory(GithubRepositoryImpl(
+            gitHubApiService = RetrofitInstance.apiService,
+            gitHubApiDataMapper = GitHubApiDataMapperImpl(TimeConverter())
+        ))
+    }
     private val searchEditText get() = binding?.searchEditText
     private val searchRecyclerView get() = binding?.searchRecyclerView
     private val circularProgressBar get() = binding?.circularProgressBar
