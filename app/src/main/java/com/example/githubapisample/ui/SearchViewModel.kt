@@ -34,10 +34,15 @@ class SearchViewModel(
     private var isMaxPageReached = false
 
     fun initialSearch(searchString: String) {
-        isMaxPageReached = true
+        searchQuery = searchString
         searchJob?.cancel()
+        _searchUIStateFlow.update {
+            it.copy(
+                stateType = StateType.LOADING
+            )
+        }
         searchJob = viewModelScope.launch {
-            delay(500)
+            delay(500) // debounce time
             searchPages.clear()
             githubRepository.searchRepositories(
                 query = searchString,
@@ -64,6 +69,7 @@ class SearchViewModel(
                                 errorMessage = response.message
                             )
                         }
+                        isMaxPageReached = false
                     }
 
                 }

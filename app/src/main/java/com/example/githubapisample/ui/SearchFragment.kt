@@ -99,7 +99,7 @@ class SearchFragment : Fragment() {
         }
 
         override fun afterTextChanged(s: Editable?) {
-            // TODO: Implement search
+            viewModel.initialSearch(s.toString())
         }
     }
 
