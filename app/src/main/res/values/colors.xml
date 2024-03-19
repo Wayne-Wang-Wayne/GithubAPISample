@@ -2,4 +2,9 @@
 <resources>
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
+    <color name="gray">#808080</color>
+    <color name="starButtonBG">#21262d</color>
+    <color name="searchCardBG">#0d1117</color>
+    <color name="card_stroke_color">#30363d</color>
+    <color name="like_button_stroke_color">#363b42</color>
 </resources>
