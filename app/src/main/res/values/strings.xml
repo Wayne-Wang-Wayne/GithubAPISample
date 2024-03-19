@@ -2,7 +2,8 @@
     <string name="app_name">Github API Sample</string>
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
-    <string name="search_something">Search something~</string>
+    <string name="search_something">嘗試搜尋一些關鍵字~</string>
     <string name="star">Star</string>
     <string name="username">username</string>
+    <string name="empty_search_list_text">目前沒資料唷，嘗試更改搜尋關鍵字看看。</string>
 </resources>

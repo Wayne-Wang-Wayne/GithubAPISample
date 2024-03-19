@@ -7,10 +7,12 @@ import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
+import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.githubapisample.databinding.FragmentSearchBinding
 import kotlinx.coroutines.launch
 
@@ -22,6 +24,9 @@ class SearchFragment : Fragment() {
     private val viewModel by viewModels<SearchViewModel>()
     private val searchEditText get() = binding?.searchEditText
     private val searchRecyclerView get() = binding?.searchRecyclerView
+    private val circularProgressBar get() = binding?.circularProgressBar
+    private val emptyListTextView get() = binding?.emptyListTextView
+    private val searchAdapter: SearchListAdapter by lazy { SearchListAdapter() }
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -33,12 +38,46 @@ class SearchFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        listenDataStream()
+        setupView()
+    }
+
+    private fun setupView() {
+        searchEditText?.addTextChangedListener(textWatcher)
+        searchRecyclerView?.apply {
+            adapter = searchAdapter
+            layoutManager = LinearLayoutManager(context)
+        }
+    }
+
+    private fun listenDataStream() {
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
-
+                viewModel.searchUIStateFlow.collect { state ->
+                    when (state.stateType) {
+                        StateType.LOADING -> {
+                            circularProgressBar?.visibility = View.VISIBLE
+                            emptyListTextView?.visibility = View.GONE
+                        }
+                        StateType.SUCCESS -> {
+                            circularProgressBar?.visibility = View.GONE
+                            if (state.repositories.isNotEmpty()) {
+                                searchRecyclerView?.visibility = View.VISIBLE
+                                emptyListTextView?.visibility = View.GONE
+                                searchAdapter.submitList(state.repositories)
+                            } else {
+                                searchRecyclerView?.visibility = View.GONE
+                                emptyListTextView?.visibility = View.VISIBLE
+                            }
+                        }
+                        StateType.ERROR -> {
+                            Toast.makeText(context, state.errorMessage, Toast.LENGTH_LONG).show()
+                            circularProgressBar?.visibility = View.GONE
+                        }
+                    }
+                }
             }
         }
-        searchEditText?.addTextChangedListener(textWatcher)
     }
 
     private val textWatcher = object : TextWatcher {
