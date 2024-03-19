@@ -7,4 +7,7 @@
     <color name="searchCardBG">#0d1117</color>
     <color name="card_stroke_color">#30363d</color>
     <color name="like_button_stroke_color">#363b42</color>
+    <color name="card_title_text_color">#2f81f7</color>
+    <color name="language_circle_bg">#f1e05a</color>
+    <color name="card_bottom_text">#758d97</color>
 </resources>
