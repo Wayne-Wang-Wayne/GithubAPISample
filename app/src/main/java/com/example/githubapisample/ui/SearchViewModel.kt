@@ -41,6 +41,15 @@ class SearchViewModel(
                 stateType = StateType.LOADING
             )
         }
+        if (searchString.isEmpty()) {
+            _searchUIStateFlow.update {
+                it.copy(
+                    stateType = StateType.SUCCESS,
+                    repositories = searchPages.firstOrNull()?.second ?: emptyList()
+                )
+            }
+            return
+        }
         searchJob = viewModelScope.launch {
             delay(500) // debounce time
             searchPages.clear()
