@@ -21,7 +21,7 @@ class GithubRepositoryImpl(
                 if (response.body() == null) {
                     GitHubResponse.Error("Failed to fetch data: response body is null")
                 } else {
-                    gitHubApiDataMapper.toGitHubResponse(response.body()!!)
+                    gitHubApiDataMapper.toSuccessGitHubResponse(response.body()!!)
                 }
             } else {
                 GitHubResponse.Error("Failed to fetch data: ${response.code()}")
