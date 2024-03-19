@@ -11,14 +11,15 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         app:layout_constraintTop_toTopOf="parent"
-        android:textColorHint="@color/white"
-        app:boxBackgroundColor="@color/black"
+        style="@style/CustomOutlineBox"
+        app:cursorColor="@color/white"
         android:hint="@string/search_something"
         android:layout_marginHorizontal="10dp"
         android:layout_marginTop="5dp">
 
         <com.google.android.material.textfield.TextInputEditText
             android:id="@+id/searchEditText"
+            android:textColor="@color/white"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"/>
 
