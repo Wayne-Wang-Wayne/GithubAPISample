@@ -71,7 +71,7 @@ class SearchViewModel(
     }
 
     suspend fun searchMore(searchDirection: SearchDirection) {
-        if (isLoadingMore) return
+        if (isLoadingMore || isMaxPageReached) return
         when (searchDirection) {
             SearchDirection.TOP -> {
                 // TODO: Implement top search
