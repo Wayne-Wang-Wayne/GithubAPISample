@@ -52,7 +52,7 @@ class SearchViewModel(
             return
         }
         searchJob = viewModelScope.launch {
-            delay(500) // debounce time
+            delay(SEARCH_DEBOUNCE_TIME) // debounce time
             searchPages.clear()
             githubRepository.searchRepositories(
                 query = searchString,
@@ -199,6 +199,10 @@ class SearchViewModel(
 private const val MAX_COUNT_THRESHOLD = 10000
 
 private const val PER_PAGE_COUNT = 100
+
+private const val SEARCH_DEBOUNCE_TIME = 500L
+
+const val SCROLLING_THRESHOLD = 40
 
 enum class SearchDirection {
     TOP,

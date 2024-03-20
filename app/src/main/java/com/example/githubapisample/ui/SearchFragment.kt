@@ -84,7 +84,7 @@ class SearchFragment : Fragment() {
                             }
                         }
                         StateType.ERROR -> {
-                            Toast.makeText(context, "有錯誤:" + state.errorMessage, Toast.LENGTH_LONG).show()
+                            Toast.makeText(context, "有錯誤，請稍後再試:" + state.errorMessage, Toast.LENGTH_LONG).show()
                             circularProgressBar?.visibility = View.GONE
                         }
                     }
@@ -102,15 +102,13 @@ class SearchFragment : Fragment() {
             val totalItemCount = layoutManager.itemCount
             val firstVisibleItemPosition = layoutManager.findFirstVisibleItemPosition()
 
-            val threshold = 40
-
             // 如果距離頂部小於等於 threshold，則call searchMore(TOP)
-            if (firstVisibleItemPosition <= threshold) {
+            if (firstVisibleItemPosition <= SCROLLING_THRESHOLD) {
                 viewModel.searchMore(SearchDirection.TOP)
             }
 
             // 如果距離底部小於等於 threshold，則call searchMore(BOTTOM)
-            if (totalItemCount - visibleItemCount <= firstVisibleItemPosition + threshold) {
+            if (totalItemCount - visibleItemCount <= firstVisibleItemPosition + SCROLLING_THRESHOLD) {
                 viewModel.searchMore(SearchDirection.BOTTOM)
             }
         }
