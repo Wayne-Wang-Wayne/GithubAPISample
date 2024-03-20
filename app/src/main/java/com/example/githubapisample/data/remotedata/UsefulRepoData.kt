@@ -10,7 +10,7 @@ data class RepoData (
     val fullName: String,
     val description: String,
     val updatedAt: String,
-    val stargazersCount: Int,
+    val stargazersCountS: String,
     val language: String,
     val avatarUrl: String
 )

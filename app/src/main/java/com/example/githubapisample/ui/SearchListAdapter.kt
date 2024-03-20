@@ -29,7 +29,7 @@ class SearchListAdapter : ListAdapter<RepoData, SearchListAdapter.ViewHolder>(Re
                 titleTextView.text = repoData.fullName
                 contentTextView.text = repoData.description
                 languageTextView.text = repoData.language
-                starCountTextView.text = repoData.stargazersCount.toString()
+                starCountTextView.text = repoData.stargazersCountS
                 timeTextView.text = itemView.context.getString(R.string.update_time_text, repoData.updatedAt)
             }
         }

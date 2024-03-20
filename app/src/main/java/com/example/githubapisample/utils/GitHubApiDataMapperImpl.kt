@@ -5,7 +5,10 @@ import com.example.githubapisample.data.remotedata.RepoData
 import com.example.githubapisample.data.remotedata.RepoResult
 import com.example.githubapisample.data.remotedata.SearchResult
 
-class GitHubApiDataMapperImpl(private val timeConverter: TimeConverter) : GitHubApiDataMapper {
+class GitHubApiDataMapperImpl(
+    private val timeConverter: TimeConverter,
+    private val countConverter: CountConverter
+) : GitHubApiDataMapper {
 
     override fun toSuccessGitHubResponse(searchResult: SearchResult): GitHubResponse = searchResult.run {
         GitHubResponse.Success(
@@ -17,7 +20,7 @@ class GitHubApiDataMapperImpl(private val timeConverter: TimeConverter) : GitHub
                         fullName = it.fullName ?: "",
                         description = it.description ?: "",
                         updatedAt = timeConverter.convertUtcToUtcPlus8(it.updatedAt),
-                        stargazersCount = it.stargazersCount ?: 0,
+                        stargazersCountS = countConverter.convertCountToKString(it.stargazersCount ?: 0),
                         language = it.language ?: "",
                         avatarUrl = it.owner?.avatarUrl ?: ""
                     )

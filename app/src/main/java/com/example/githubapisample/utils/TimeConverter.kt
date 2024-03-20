@@ -4,14 +4,8 @@ import java.time.ZoneId
 import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
 
-class TimeConverter {
+interface TimeConverter {
 
-    fun convertUtcToUtcPlus8(utcTime: String?): String {
-        if (utcTime == null) return ""
-        val dateTime = ZonedDateTime.parse(utcTime)
-        val utcPlus8Time = dateTime.withZoneSameInstant(ZoneId.of("UTC+8"))
-        val formatter = DateTimeFormatter.ofPattern("yyyy年MM月dd日")
-        return utcPlus8Time.format(formatter)
-    }
+    fun convertUtcToUtcPlus8(utcTime: String?): String
 
 }
