@@ -12,7 +12,7 @@ class CountConverterImpl : CountConverter {
      * 3000->3k
      * 33300->33.3k
      * 33000->33k
-     * 33098->33k
+     * 33098->33.1k
      */
     override fun convertCountToKString(count: Int): String {
         return when {
