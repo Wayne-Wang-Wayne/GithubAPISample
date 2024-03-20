@@ -19,21 +19,16 @@ import com.example.githubapisample.data.remotedata.RetrofitInstance
 import com.example.githubapisample.databinding.FragmentSearchBinding
 import com.example.githubapisample.utils.CountConverterImpl
 import com.example.githubapisample.utils.GitHubApiDataMapperImpl
-import com.example.githubapisample.utils.TimeConverter
 import com.example.githubapisample.utils.TimeConverterImpl
 import kotlinx.coroutines.launch
+import org.koin.androidx.viewmodel.ext.android.viewModel
 
 
 class SearchFragment : Fragment() {
 
     private var _binding: FragmentSearchBinding? = null
     private val binding get() = _binding
-    private val viewModel by viewModels<SearchViewModel> {
-        SearchViewModelFactory(GithubRepositoryImpl(
-            gitHubApiService = RetrofitInstance.apiService,
-            gitHubApiDataMapper = GitHubApiDataMapperImpl(TimeConverterImpl(), CountConverterImpl())
-        ))
-    }
+    private val searchViewModel : SearchViewModel by viewModel()
     private val searchEditText get() = binding?.searchEditText
     private val searchRecyclerView get() = binding?.searchRecyclerView
     private val circularProgressBar get() = binding?.circularProgressBar
@@ -66,7 +61,7 @@ class SearchFragment : Fragment() {
     private fun listenDataStream() {
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
-                viewModel.searchUIStateFlow.collect { state ->
+                searchViewModel.searchUIStateFlow.collect { state ->
                     when (state.stateType) {
                         StateType.LOADING -> {
                             circularProgressBar?.visibility = View.VISIBLE
@@ -104,12 +99,12 @@ class SearchFragment : Fragment() {
 
             // 如果距離頂部小於等於 threshold，則call searchMore(TOP)
             if (firstVisibleItemPosition <= SCROLLING_THRESHOLD) {
-                viewModel.searchMore(SearchDirection.TOP)
+                searchViewModel.searchMore(SearchDirection.TOP)
             }
 
             // 如果距離底部小於等於 threshold，則call searchMore(BOTTOM)
             if (totalItemCount - visibleItemCount <= firstVisibleItemPosition + SCROLLING_THRESHOLD) {
-                viewModel.searchMore(SearchDirection.BOTTOM)
+                searchViewModel.searchMore(SearchDirection.BOTTOM)
             }
         }
     }
@@ -124,7 +119,7 @@ class SearchFragment : Fragment() {
         }
 
         override fun afterTextChanged(s: Editable?) {
-            viewModel.initialSearch(s.toString())
+            searchViewModel.initialSearch(s.toString())
         }
     }
 
