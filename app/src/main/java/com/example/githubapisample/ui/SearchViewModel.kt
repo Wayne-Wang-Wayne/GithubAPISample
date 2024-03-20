@@ -40,22 +40,13 @@ class SearchViewModel(
     fun initialSearch(searchString: String) {
         searchQuery = searchString
         searchJob?.cancel()
-        _searchUIStateFlow.update {
-            it.copy(
-                stateType = StateType.LOADING
-            )
-        }
+        updateLoadingUIState()
         if (searchString.isEmpty()) {
-            _searchUIStateFlow.update {
-                it.copy(
-                    stateType = StateType.SUCCESS,
-                    repositories = searchPages.firstOrNull()?.second ?: emptyList()
-                )
-            }
+            updateSuccessState(searchPages.firstOrNull()?.second ?: emptyList())
             return
         }
         searchJob = viewModelScope.launch {
-            delay(SEARCH_DEBOUNCE_TIME) // debounce time
+            delay(SEARCH_DEBOUNCE_TIME) // debounce
             searchPages.clear()
             githubRepository.searchRepositories(
                 query = searchString,
@@ -65,40 +56,27 @@ class SearchViewModel(
                 when (response) {
                     is GitHubResponse.Success -> {
                         searchPages.add(1 to response.repoResult.repoDataList)
-                        _searchUIStateFlow.update {
-                            it.copy(
-                                stateType = StateType.SUCCESS,
-                                repositories = response.repoResult.repoDataList
-                            )
-                        }
+                        updateSuccessState(response.repoResult.repoDataList)
                         modifyIsMaxFlag(response.repoResult.totalCount)
                     }
                     is GitHubResponse.Error -> {
-                        _searchUIStateFlow.update {
-                            it.copy(
-                                stateType = StateType.ERROR,
-                                errorMessage = response.message
-                            )
-                        }
+                        updateErrorUIState(response.message)
                         isMaxPageReached = false
                     }
-
                 }
             }
         }
     }
 
-    private fun modifyIsMaxFlag(maxCount: Int) {
-        isHasMoreData(maxCount).let { isHasMore ->
-            isMaxPageReached = !isHasMore
-        }
-    }
-
+    /**
+     * 搜尋更多，貫徹infinite scroll的概念，會移除上下方離太遠的資料，就算滑了一兆筆資料也不會OOM
+     * remove first和last的時間複雜度為O(1)，十分有效率
+     */
     fun searchMore(searchDirection: SearchDirection) {
         if (isLoadingMore || searchPages.isEmpty()) return
+        isLoadingMore = true
         when (searchDirection) {
             SearchDirection.TOP -> {
-                isLoadingMore = true
                 searchPages.safeSearchMoreTop { firstPage ->
                     viewModelScope.launch {
                         githubRepository.searchRepositories(
@@ -112,22 +90,12 @@ class SearchViewModel(
                                     if (MAX_COUNT_THRESHOLD < searchPages.sumOf { it.second.size }) {
                                         searchPages.removeLast()
                                     }
-                                    _searchUIStateFlow.update {
-                                        it.copy(
-                                            stateType = StateType.SUCCESS,
-                                            repositories = searchPages.flatMap { repositories -> repositories.second }
-                                        )
-                                    }
+                                    updateSuccessState(searchPages.flatMap { repositories -> repositories.second })
                                     Log.d(tag, "searchPages Bottom: ${searchPages.map { it.first }}")
                                     modifyIsMaxFlag(response.repoResult.totalCount)
                                 }
                                 is GitHubResponse.Error -> {
-                                    _searchUIStateFlow.update {
-                                        it.copy(
-                                            stateType = StateType.ERROR,
-                                            errorMessage = response.message
-                                        )
-                                    }
+                                    updateErrorUIState(response.message)
                                 }
                             }
                         }
@@ -136,7 +104,6 @@ class SearchViewModel(
                 }
             }
             SearchDirection.BOTTOM -> {
-                isLoadingMore = true
                 safeSearchMoreBottom { lastPage ->
                     viewModelScope.launch {
                         githubRepository.searchRepositories(
@@ -150,22 +117,12 @@ class SearchViewModel(
                                     if (MAX_COUNT_THRESHOLD < searchPages.sumOf { it.second.size }) {
                                         searchPages.removeFirst()
                                     }
-                                    _searchUIStateFlow.update {
-                                        it.copy(
-                                            stateType = StateType.SUCCESS,
-                                            repositories = searchPages.flatMap { repositories -> repositories.second }
-                                        )
-                                    }
+                                    updateSuccessState(searchPages.flatMap { repositories -> repositories.second })
                                     modifyIsMaxFlag(response.repoResult.totalCount)
                                     Log.d("SearchViewModel", "searchPages Bottom: ${searchPages.map { it.first }}")
                                 }
                                 is GitHubResponse.Error -> {
-                                    _searchUIStateFlow.update {
-                                        it.copy(
-                                            stateType = StateType.ERROR,
-                                            errorMessage = response.message
-                                        )
-                                    }
+                                    updateErrorUIState(response.message)
                                 }
                             }
                         }
@@ -176,6 +133,38 @@ class SearchViewModel(
         }
     }
 
+    private fun updateSuccessState(validList: List<RepoData>) {
+        _searchUIStateFlow.update {
+            it.copy(
+                stateType = StateType.SUCCESS,
+                repositories = validList
+            )
+        }
+    }
+
+    private fun updateLoadingUIState() {
+        _searchUIStateFlow.update {
+            it.copy(
+                stateType = StateType.LOADING
+            )
+        }
+    }
+
+    private fun modifyIsMaxFlag(maxCount: Int) {
+        isHasMoreData(maxCount).let { isHasMore ->
+            isMaxPageReached = !isHasMore
+        }
+    }
+
+    private fun updateErrorUIState(message: String) {
+        _searchUIStateFlow.update {
+            it.copy(
+                stateType = StateType.ERROR,
+                errorMessage = message
+            )
+        }
+    }
+
     private fun isHasMoreData(totalCount: Int): Boolean {
         val lastPage = searchPages.lastOrNull()?.first ?: -1
         return lastPage * PER_PAGE_COUNT < totalCount
@@ -183,7 +172,7 @@ class SearchViewModel(
 
     private fun LinkedList<Pair<Int, List<RepoData>>>.safeSearchMoreTop(callback: (Int) -> Unit) {
         val firstPage = firstOrNull()?.first ?: 1
-        if (firstPage == 1) {
+        if (firstPage <= 1) {
             isLoadingMore = false
             return
         }
