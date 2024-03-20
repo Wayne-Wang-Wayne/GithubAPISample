@@ -1,4 +1,4 @@
-package com.example.githubapisample.data
+package com.example.githubapisample.fakeclass
 
 import com.example.githubapisample.data.remotedata.GitHubApiService
 import com.example.githubapisample.data.remotedata.Repository

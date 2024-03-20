@@ -1,5 +1,7 @@
 package com.example.githubapisample.data
 
+import com.example.githubapisample.fakeclass.FakeGitHubApiDataMapper
+import com.example.githubapisample.fakeclass.FakeGitHubApiService
 import com.example.githubapisample.data.remotedata.GitHubResponse
 import com.example.githubapisample.data.remotedata.GithubRepositoryImpl
 import kotlinx.coroutines.ExperimentalCoroutinesApi
