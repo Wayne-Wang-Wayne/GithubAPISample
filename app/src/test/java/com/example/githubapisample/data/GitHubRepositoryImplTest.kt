@@ -29,7 +29,7 @@ class GitHubRepositoryImplTest {
     fun setUp() {
         fakeGitHubApiService = FakeGitHubApiService()
         fakeGitHubApiDataMapper = FakeGitHubApiDataMapper()
-        gitHubRepositoryImpl = GithubRepositoryImpl(fakeGitHubApiService, fakeGitHubApiDataMapper)
+        gitHubRepositoryImpl = GithubRepositoryImpl(fakeGitHubApiService, fakeGitHubApiDataMapper, testDispatcher)
     }
     @Test
     fun gitHubRepositoryImplTest_searchRepositoriesSuccess_shouldGetSuccessGitHubResponse() = testScope.runTest {
