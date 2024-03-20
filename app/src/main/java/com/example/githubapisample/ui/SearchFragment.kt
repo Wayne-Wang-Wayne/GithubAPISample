@@ -13,6 +13,7 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.example.githubapisample.data.remotedata.GithubRepositoryImpl
 import com.example.githubapisample.data.remotedata.RetrofitInstance
 import com.example.githubapisample.databinding.FragmentSearchBinding
@@ -58,6 +59,7 @@ class SearchFragment : Fragment() {
         searchRecyclerView?.apply {
             adapter = searchAdapter
             layoutManager = LinearLayoutManager(context)
+            addOnScrollListener(scrollListener)
         }
     }
 
@@ -91,6 +93,29 @@ class SearchFragment : Fragment() {
         }
     }
 
+    private val scrollListener = object : RecyclerView.OnScrollListener() {
+        override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
+            super.onScrolled(recyclerView, dx, dy)
+
+            val layoutManager = recyclerView.layoutManager as LinearLayoutManager
+            val visibleItemCount = layoutManager.childCount
+            val totalItemCount = layoutManager.itemCount
+            val firstVisibleItemPosition = layoutManager.findFirstVisibleItemPosition()
+
+            val threshold = 40
+
+            // 如果距離頂部小於等於 threshold，則call searchMore(TOP)
+            if (firstVisibleItemPosition <= threshold) {
+                viewModel.searchMore(SearchDirection.TOP)
+            }
+
+            // 如果距離底部小於等於 threshold，則call searchMore(BOTTOM)
+            if (totalItemCount - visibleItemCount <= firstVisibleItemPosition + threshold) {
+                viewModel.searchMore(SearchDirection.BOTTOM)
+            }
+        }
+    }
+
     private val textWatcher = object : TextWatcher {
         override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {
 
@@ -109,6 +134,7 @@ class SearchFragment : Fragment() {
         super.onDestroyView()
         _binding = null
         searchEditText?.removeTextChangedListener(textWatcher)
+        searchRecyclerView?.removeOnScrollListener(scrollListener)
     }
 
     companion object {

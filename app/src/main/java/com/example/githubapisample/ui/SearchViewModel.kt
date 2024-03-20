@@ -23,6 +23,7 @@ class SearchViewModel(
 
     val searchUIStateFlow: StateFlow<SearchUIState> = _searchUIStateFlow.asStateFlow()
 
+    // 使用LinkedList，因remove first和last的時間複雜度為O(1)
     private val searchPages: LinkedList<Pair<Int, List<RepoData>>> = LinkedList()
 
     private var isLoadingMore = false
@@ -55,7 +56,7 @@ class SearchViewModel(
             searchPages.clear()
             githubRepository.searchRepositories(
                 query = searchString,
-                perPage = 50,
+                perPage = PER_PAGE_COUNT,
                 page = 1
             ).let { response ->
                 when (response) {
@@ -67,9 +68,7 @@ class SearchViewModel(
                                 repositories = response.repoResult.repoDataList
                             )
                         }
-                        isHasMoreData(response.repoResult.totalCount).let { isHasMore ->
-                            isMaxPageReached = !isHasMore
-                        }
+                        modifyIsMaxFlag(response.repoResult.totalCount)
                     }
                     is GitHubResponse.Error -> {
                         _searchUIStateFlow.update {
@@ -86,23 +85,120 @@ class SearchViewModel(
         }
     }
 
-    suspend fun searchMore(searchDirection: SearchDirection) {
-        if (isLoadingMore || isMaxPageReached) return
+    private fun modifyIsMaxFlag(maxCount: Int) {
+        isHasMoreData(maxCount).let { isHasMore ->
+            isMaxPageReached = !isHasMore
+        }
+    }
+
+    fun searchMore(searchDirection: SearchDirection) {
+        if (isLoadingMore || searchPages.isEmpty()) return
         when (searchDirection) {
             SearchDirection.TOP -> {
-                // TODO: Implement top search
+                isLoadingMore = true
+                searchPages.safeSearchMoreTop { firstPage ->
+                    viewModelScope.launch {
+                        githubRepository.searchRepositories(
+                            query = searchQuery,
+                            perPage = PER_PAGE_COUNT,
+                            page = firstPage
+                        ).let { response ->
+                            when (response) {
+                                is GitHubResponse.Success -> {
+                                    searchPages.addFirst(firstPage to response.repoResult.repoDataList)
+                                    if (MAX_COUNT_THRESHOLD < searchPages.sumOf { it.second.size }) {
+                                        searchPages.removeLast()
+                                    }
+                                    _searchUIStateFlow.update {
+                                        it.copy(
+                                            stateType = StateType.SUCCESS,
+                                            repositories = searchPages.flatMap { repositories -> repositories.second }
+                                        )
+                                    }
+                                    modifyIsMaxFlag(response.repoResult.totalCount)
+                                }
+                                is GitHubResponse.Error -> {
+                                    _searchUIStateFlow.update {
+                                        it.copy(
+                                            stateType = StateType.ERROR,
+                                            errorMessage = response.message
+                                        )
+                                    }
+                                }
+                            }
+                        }
+                        isLoadingMore = false
+                    }
+                }
             }
             SearchDirection.BOTTOM -> {
-                // TODO: Implement bottom search
+                isLoadingMore = true
+                safeSearchMoreBottom { lastPage ->
+                    viewModelScope.launch {
+                        githubRepository.searchRepositories(
+                            query = searchQuery,
+                            perPage = PER_PAGE_COUNT,
+                            page = lastPage
+                        ).let { response ->
+                            when (response) {
+                                is GitHubResponse.Success -> {
+                                    searchPages.add(lastPage to response.repoResult.repoDataList)
+                                    if (MAX_COUNT_THRESHOLD < searchPages.sumOf { it.second.size }) {
+                                        searchPages.removeFirst()
+                                    }
+                                    _searchUIStateFlow.update {
+                                        it.copy(
+                                            stateType = StateType.SUCCESS,
+                                            repositories = searchPages.flatMap { repositories -> repositories.second }
+                                        )
+                                    }
+                                    modifyIsMaxFlag(response.repoResult.totalCount)
+                                }
+                                is GitHubResponse.Error -> {
+                                    _searchUIStateFlow.update {
+                                        it.copy(
+                                            stateType = StateType.ERROR,
+                                            errorMessage = response.message
+                                        )
+                                    }
+                                }
+                            }
+                        }
+                        isLoadingMore = false
+                    }
+                }
             }
         }
     }
 
     private fun isHasMoreData(totalCount: Int): Boolean {
-        return searchPages.sumOf { it.second.size } < totalCount
+        val lastPage = searchPages.lastOrNull()?.first ?: -1
+        return lastPage * PER_PAGE_COUNT < totalCount
+    }
+
+    private fun LinkedList<Pair<Int, List<RepoData>>>.safeSearchMoreTop(callback: (Int) -> Unit) {
+        val firstPage = firstOrNull()?.first ?: 1
+        if (firstPage == 1) {
+            isLoadingMore = false
+            return
+        }
+        callback(firstPage - 1)
+    }
+
+    private fun safeSearchMoreBottom(callback: (Int) -> Unit) {
+        val lastPage = searchPages.lastOrNull()?.first ?: -1
+        if (isMaxPageReached || lastPage == -1) {
+            isLoadingMore = false
+            return
+        }
+        callback(lastPage + 1)
     }
 
 }
+
+private const val MAX_COUNT_THRESHOLD = 10000
+
+private const val PER_PAGE_COUNT = 100
 
 enum class SearchDirection {
     TOP,
