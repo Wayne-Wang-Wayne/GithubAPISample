@@ -41,7 +41,7 @@ class SearchViewModel(
         searchQuery = searchString
         searchJob?.cancel()
         updateLoadingUIState()
-        if (searchString.isEmpty()) {
+        if (searchString.trim().isEmpty()) {
             updateSuccessState(searchPages.firstOrNull()?.second ?: emptyList())
             return
         }
