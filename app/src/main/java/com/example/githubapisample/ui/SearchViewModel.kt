@@ -1,5 +1,6 @@
 package com.example.githubapisample.ui
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
@@ -18,6 +19,8 @@ import java.util.LinkedList
 class SearchViewModel(
     private val githubRepository: GithubRepository,
 ) : ViewModel() {
+
+    private val tag = "SearchViewModel"
 
     private val _searchUIStateFlow = MutableStateFlow(SearchUIState())
 
@@ -115,6 +118,7 @@ class SearchViewModel(
                                             repositories = searchPages.flatMap { repositories -> repositories.second }
                                         )
                                     }
+                                    Log.d(tag, "searchPages Bottom: ${searchPages.map { it.first }}")
                                     modifyIsMaxFlag(response.repoResult.totalCount)
                                 }
                                 is GitHubResponse.Error -> {
@@ -153,6 +157,7 @@ class SearchViewModel(
                                         )
                                     }
                                     modifyIsMaxFlag(response.repoResult.totalCount)
+                                    Log.d("SearchViewModel", "searchPages Bottom: ${searchPages.map { it.first }}")
                                 }
                                 is GitHubResponse.Error -> {
                                     _searchUIStateFlow.update {
