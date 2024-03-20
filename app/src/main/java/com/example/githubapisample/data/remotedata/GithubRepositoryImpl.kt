@@ -16,7 +16,7 @@ class GithubRepositoryImpl(
         query: String,
         perPage: Int,
         page: Int
-    ): GitHubResponse = withContext(ioDispatcher) {
+    ): GitHubResponse =
         try {
             val response = gitHubApiService.searchRepositories(query, perPage, page)
             if (response.isSuccessful) {
@@ -31,6 +31,5 @@ class GithubRepositoryImpl(
         } catch (e: Exception) {
             GitHubResponse.Error("Error: ${e.message}")
         }
-    }
 
 }

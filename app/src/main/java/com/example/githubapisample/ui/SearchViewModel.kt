@@ -38,7 +38,6 @@ class SearchViewModel(
     private var isMaxPageReached = false
 
     fun initialSearch(searchString: String) {
-        searchQuery = searchString
         searchJob?.cancel()
         updateLoadingUIState()
         if (searchString.trim().isEmpty()) {
@@ -48,6 +47,7 @@ class SearchViewModel(
         searchJob = viewModelScope.launch {
             delay(SEARCH_DEBOUNCE_TIME) // debounce
             searchPages.clear()
+            searchQuery = searchString
             githubRepository.searchRepositories(
                 query = searchString,
                 perPage = PER_PAGE_COUNT,
