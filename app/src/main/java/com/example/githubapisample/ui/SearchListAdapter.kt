@@ -6,6 +6,7 @@ import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import coil.load
+import com.example.githubapisample.R
 import com.example.githubapisample.data.remotedata.RepoData
 import com.example.githubapisample.databinding.ItemSearchBinding
 
@@ -29,7 +30,7 @@ class SearchListAdapter : ListAdapter<RepoData, SearchListAdapter.ViewHolder>(Re
                 contentTextView.text = repoData.description
                 languageTextView.text = repoData.language
                 starCountTextView.text = repoData.stargazersCount.toString()
-                timeTextView.text = repoData.updatedAt
+                timeTextView.text = itemView.context.getString(R.string.update_time_text, repoData.updatedAt)
             }
         }
     }

@@ -6,4 +6,5 @@
     <string name="star">Star</string>
     <string name="username">username</string>
     <string name="empty_search_list_text">目前沒資料唷，嘗試更改搜尋關鍵字看看。</string>
+    <string name="update_time_text">Updated on %1$s</string>
 </resources>
