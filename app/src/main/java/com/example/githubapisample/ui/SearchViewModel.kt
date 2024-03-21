@@ -37,22 +37,22 @@ class SearchViewModel(
     /**
      * 使用已經實作好的debounce去包裝，避免過多的搜尋
      */
-    val debounceSearchFun = FunctionUtil.debounce<String>(viewModelScope, { searchString ->
-        if (searchString == "") return@debounce
-        gitHubResponseGenerator?.destroy()
-        updateLoadingUIState()
-        gitHubResponseGenerator = GitHubResponseGenerator(searchString)
-        gitHubResponseGenerator?.next(SearchDirection.NONE, { _, response ->
-            searchPages.add(1 to response.repoResult.repoDataList)
-        })
-    }, SEARCH_DEBOUNCE_TIME)
+    val debounce = FunctionUtil.debounce(viewModelScope, SEARCH_DEBOUNCE_TIME)
 
 
     /**
      * 變換關鍵字的初始搜尋
      */
     fun initialSearch(searchString: String) {
-        debounceSearchFun(searchString)
+        debounce debounce@{
+            if (searchString == "") return@debounce
+            gitHubResponseGenerator?.destroy()
+            updateLoadingUIState()
+            gitHubResponseGenerator = GitHubResponseGenerator(searchString)
+            gitHubResponseGenerator?.next(SearchDirection.NONE, { _, response ->
+                searchPages.add(1 to response.repoResult.repoDataList)
+            })
+        }
     }
 
 
@@ -121,7 +121,7 @@ class SearchViewModel(
 
         private var searchJob: Job? = null
 
-        private val lockFun = FunctionUtil.lock(viewModelScope)
+        private val lock = FunctionUtil.lock(viewModelScope)
 
         fun next(
             searchDirection: SearchDirection,
@@ -146,7 +146,7 @@ class SearchViewModel(
 
             if (nextPage == -1) return
 
-            searchJob = lockFun {
+            searchJob = lock {
                 Log.d(tag, "searching $input ${Thread.currentThread()}")
                 search(input, PER_PAGE_COUNT, nextPage, {
                     onSuccess(nextPage, it)

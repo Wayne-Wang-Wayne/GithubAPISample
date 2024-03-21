@@ -14,19 +14,17 @@ class FunctionUtil {
 
     companion object {
 
-        fun <T> debounce(
+        fun debounce(
             coroutineScope: CoroutineScope,
-            runnable: suspend (T) -> Unit,
             milli: Long
-        ): (T) -> Unit {
+        ): (suspend () -> Unit) -> Unit {
             var debounceJob: Job? = null
 
             return {
                 debounceJob?.cancel()
-                Log.d(TAG, "debounce $it")
                 debounceJob = coroutineScope.launch {
                     delay(milli)
-                    runnable(it)
+                    it.invoke()
                 }
             }
         }
