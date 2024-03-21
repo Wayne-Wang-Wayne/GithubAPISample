@@ -12,7 +12,6 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
-import kotlinx.coroutines.launch
 import java.util.LinkedList
 
 class SearchViewModel(
@@ -65,16 +64,16 @@ class SearchViewModel(
      * remove first和last的時間複雜度為O(1)，十分有效率
      */
     fun searchMore(searchDirection: SearchDirection) {
-        var onResponse: (Int, GitHubResponse.Success) -> Unit = { _, _ -> }
+        var onSuccess: (Int, GitHubResponse.Success) -> Unit = { _, _ -> }
         if (searchDirection == SearchDirection.TOP) {
-            onResponse = { page, response ->
+            onSuccess = { page, response ->
                 searchPages.addFirst(page to response.repoResult.repoDataList)
                 if (MAX_COUNT_THRESHOLD < searchPages.sumOf { it.second.size }) {
                     searchPages.removeLast()
                 }
             }
         } else if (searchDirection == SearchDirection.BOTTOM) {
-            onResponse = { lastPage, response ->
+            onSuccess = { lastPage, response ->
                 Log.d(tag, "lastPage $lastPage")
                 searchPages.add(lastPage to response.repoResult.repoDataList)
                 if (MAX_COUNT_THRESHOLD < searchPages.sumOf { it.second.size }) {
@@ -82,7 +81,7 @@ class SearchViewModel(
                 }
             }
         }
-        gitHubResponseGenerator?.next(searchDirection, onResponse)
+        gitHubResponseGenerator?.next(searchDirection, onSuccess)
     }
 
 
