@@ -19,7 +19,8 @@ class FakeGitHubApiDataMapper : GitHubApiDataMapper {
                         updatedAt = "",
                         stargazersCountS = "",
                         language = "",
-                        avatarUrl = ""
+                        avatarUrl = "",
+                        repoUrl = ""
                     )
                 } ?: emptyList()
             )

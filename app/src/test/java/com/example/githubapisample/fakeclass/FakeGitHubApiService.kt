@@ -18,7 +18,7 @@ class FakeGitHubApiService : GitHubApiService {
 
     val errorCode = 404
 
-    val fakeSuccessData = SearchResult(300, false, listOf(
+    private val fakeSuccessData = SearchResult(300, false, listOf(
         Repository(id = 1L),
         Repository(id = 2L),
         Repository(id = 3L),

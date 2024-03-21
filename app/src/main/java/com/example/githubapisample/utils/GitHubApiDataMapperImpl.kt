@@ -22,7 +22,8 @@ class GitHubApiDataMapperImpl(
                         updatedAt = timeConverter.convertUtcToUtcPlus8(it.updatedAt),
                         stargazersCountS = countConverter.convertCountToKString(it.stargazersCount ?: 0),
                         language = it.language ?: "",
-                        avatarUrl = it.owner?.avatarUrl ?: ""
+                        avatarUrl = it.owner?.avatarUrl ?: "",
+                        repoUrl = it.htmlUrl ?: ""
                     )
                 } ?: emptyList()
             )

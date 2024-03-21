@@ -1,29 +1,25 @@
 package com.example.githubapisample.ui
 
 import android.content.Context
+import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
 import android.util.Log
-import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
 import android.view.inputmethod.InputMethodManager
 import android.widget.Toast
-import androidx.fragment.app.viewModels
+import androidx.fragment.app.Fragment
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.example.githubapisample.data.remotedata.GithubRepositoryImpl
-import com.example.githubapisample.data.remotedata.RetrofitInstance
 import com.example.githubapisample.databinding.FragmentSearchBinding
-import com.example.githubapisample.utils.CountConverterImpl
-import com.example.githubapisample.utils.GitHubApiDataMapperImpl
-import com.example.githubapisample.utils.TimeConverterImpl
 import kotlinx.coroutines.launch
 import org.koin.androidx.viewmodel.ext.android.viewModel
 
@@ -39,7 +35,7 @@ class SearchFragment : Fragment() {
     private val searchRecyclerView get() = binding?.searchRecyclerView
     private val circularProgressBar get() = binding?.circularProgressBar
     private val emptyListTextView get() = binding?.emptyListTextView
-    private val searchAdapter: SearchListAdapter by lazy { SearchListAdapter() }
+    private val searchAdapter: SearchListAdapter by lazy { SearchListAdapter(::openUrl) }
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -156,6 +152,14 @@ class SearchFragment : Fragment() {
 
         override fun afterTextChanged(s: Editable?) {
             searchViewModel.initialSearch(s.toString())
+        }
+    }
+
+    private fun openUrl(url: String) {
+        if (url.isEmpty()) return
+        Intent(Intent.ACTION_VIEW).apply {
+            setData(Uri.parse(url))
+            startActivity(this)
         }
     }
 

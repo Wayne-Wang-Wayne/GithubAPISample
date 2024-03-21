@@ -10,7 +10,7 @@ import com.example.githubapisample.R
 import com.example.githubapisample.data.remotedata.RepoData
 import com.example.githubapisample.databinding.ItemSearchBinding
 
-class SearchListAdapter : ListAdapter<RepoData, SearchListAdapter.ViewHolder>(RepoDataDiffCallback()) {
+class SearchListAdapter(val onClick: (String) -> Unit) : ListAdapter<RepoData, SearchListAdapter.ViewHolder>(RepoDataDiffCallback()) {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
         val binding = ItemSearchBinding.inflate(LayoutInflater.from(parent.context), parent, false)
@@ -31,6 +31,9 @@ class SearchListAdapter : ListAdapter<RepoData, SearchListAdapter.ViewHolder>(Re
                 languageTextView.text = repoData.language
                 starCountTextView.text = repoData.stargazersCountS
                 timeTextView.text = itemView.context.getString(R.string.update_time_text, repoData.updatedAt)
+                root.setOnClickListener {
+                    onClick(repoData.repoUrl)
+                }
             }
         }
     }

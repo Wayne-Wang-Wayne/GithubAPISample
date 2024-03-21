@@ -12,7 +12,8 @@ data class RepoData (
     val updatedAt: String,
     val stargazersCountS: String,
     val language: String,
-    val avatarUrl: String
+    val avatarUrl: String,
+    val repoUrl: String
 )
 
 sealed class GitHubResponse {
