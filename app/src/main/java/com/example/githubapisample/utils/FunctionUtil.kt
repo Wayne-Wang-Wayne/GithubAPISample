@@ -31,17 +31,16 @@ class FunctionUtil {
             }
         }
 
-        fun <T> lock(
+        fun lock(
             coroutineScope: CoroutineScope,
-            runnable: suspend (T) -> Unit
-        ): (T) -> Job? {
+        ): (suspend () -> Unit) -> Job? {
             var isSearching = false
             var job: Job? = null
-            return { param ->
+            return {
                 if (!isSearching) {
                     isSearching = true
                     job = coroutineScope.launch {
-                        runnable(param)
+                        it.invoke()
                         isSearching = false
                         job = null
                     }

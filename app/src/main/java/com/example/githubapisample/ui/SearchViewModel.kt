@@ -28,9 +28,15 @@ class SearchViewModel(
     // 使用LinkedList，因remove first和last的時間複雜度為O(1)
     private val searchPages: LinkedList<Pair<Int, List<RepoData>>> = LinkedList()
 
-
+    /**
+     * 使用Generator管理Task，避免衝突
+     */
     private var gitHubResponseGenerator: GitHubResponseGenerator? = null
 
+
+    /**
+     * 使用已經實作好的debounce去包裝，避免過多的搜尋
+     */
     val debounceSearchFun = FunctionUtil.debounce<String>(viewModelScope, { searchString ->
         if (searchString == "") return@debounce
         gitHubResponseGenerator?.destroy()
@@ -115,17 +121,7 @@ class SearchViewModel(
 
         private var searchJob: Job? = null
 
-        private val lockSearchFun =
-            FunctionUtil.lock<SearchMoreParam>(viewModelScope) { searchMoreParam ->
-                val nextPage = searchMoreParam.nextPage
-                val onSuccess = searchMoreParam.onSuccess
-                val onError = searchMoreParam.onError
-                Log.d(tag, "searching $input ${Thread.currentThread()}")
-                search(input, PER_PAGE_COUNT, nextPage, {
-                    onSuccess(nextPage, it)
-                }, onError)
-                Log.d(tag, "searching ended")
-            }
+        private val lockFun = FunctionUtil.lock(viewModelScope)
 
         fun next(
             searchDirection: SearchDirection,
@@ -150,7 +146,13 @@ class SearchViewModel(
 
             if (nextPage == -1) return
 
-            searchJob = lockSearchFun(SearchMoreParam(nextPage, onSuccess, onError))
+            searchJob = lockFun {
+                Log.d(tag, "searching $input ${Thread.currentThread()}")
+                search(input, PER_PAGE_COUNT, nextPage, {
+                    onSuccess(nextPage, it)
+                }, onError)
+                Log.d(tag, "searching ended")
+            }
 
         }
 
