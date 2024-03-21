@@ -1,6 +1,8 @@
 package com.example.githubapisample.utils
 
 import android.util.Log
+import com.example.githubapisample.data.remotedata.GitHubResponse
+import com.example.githubapisample.ui.SearchDirection
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
@@ -26,6 +28,25 @@ class FunctionUtil {
                     delay(milli)
                     runnable(it)
                 }
+            }
+        }
+
+        fun <T> lock(
+            coroutineScope: CoroutineScope,
+            runnable: suspend (T) -> Unit
+        ): (T) -> Job? {
+            var isSearching = false
+            var job: Job? = null
+            return { param ->
+                if (!isSearching) {
+                    isSearching = true
+                    job = coroutineScope.launch {
+                        runnable(param)
+                        isSearching = false
+                        job = null
+                    }
+                }
+                job
             }
         }
     }

@@ -115,6 +115,18 @@ class SearchViewModel(
 
         private var searchJob: Job? = null
 
+        private val lockSearchFun =
+            FunctionUtil.lock<SearchMoreParam>(viewModelScope) { searchMoreParam ->
+                val nextPage = searchMoreParam.nextPage
+                val onSuccess = searchMoreParam.onSuccess
+                val onError = searchMoreParam.onError
+                Log.d(tag, "searching $input ${Thread.currentThread()}")
+                search(input, PER_PAGE_COUNT, nextPage, {
+                    onSuccess(nextPage, it)
+                }, onError)
+                Log.d(tag, "searching ended")
+            }
+
         fun next(
             searchDirection: SearchDirection,
             onSuccess: (Int, GitHubResponse.Success) -> Unit,
@@ -138,19 +150,8 @@ class SearchViewModel(
 
             if (nextPage == -1) return
 
-            if (isSearching) return
-            isSearching = true
+            searchJob = lockSearchFun(SearchMoreParam(nextPage, onSuccess, onError))
 
-            searchJob = viewModelScope.launch {
-
-                Log.d(tag, "searching ${input} ${Thread.currentThread()}")
-                search(input, PER_PAGE_COUNT, nextPage, {
-                    onSuccess(nextPage, it)
-                }, onError)
-                Log.d(tag, "searching ended")
-
-                isSearching = false
-            }
         }
 
         fun destroy() {
