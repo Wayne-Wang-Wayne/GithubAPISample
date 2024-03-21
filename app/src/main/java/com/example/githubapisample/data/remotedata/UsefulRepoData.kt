@@ -18,4 +18,5 @@ data class RepoData (
 sealed class GitHubResponse {
     data class Success(val repoResult: RepoResult) : GitHubResponse()
     data class Error(val message: String) : GitHubResponse()
+    data object Cancel : GitHubResponse()
 }

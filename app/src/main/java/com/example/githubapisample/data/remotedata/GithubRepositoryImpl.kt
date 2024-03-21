@@ -2,9 +2,8 @@ package com.example.githubapisample.data.remotedata
 
 import com.example.githubapisample.data.GithubRepository
 import com.example.githubapisample.utils.GitHubApiDataMapper
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineDispatcher
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
 
 class GithubRepositoryImpl(
     private val gitHubApiService: GitHubApiService,
@@ -28,8 +27,9 @@ class GithubRepositoryImpl(
             } else {
                 GitHubResponse.Error("Failed to fetch data: ${response.code()}")
             }
+        } catch (e: CancellationException) {
+            GitHubResponse.Cancel
         } catch (e: Exception) {
             GitHubResponse.Error("Error: ${e.message}")
         }
-
 }
