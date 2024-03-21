@@ -1,12 +1,16 @@
 package com.example.githubapisample.ui
 
+import android.content.Context
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
+import android.util.Log
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
+import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
+import android.view.inputmethod.InputMethodManager
 import android.widget.Toast
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
@@ -25,6 +29,8 @@ import org.koin.androidx.viewmodel.ext.android.viewModel
 
 
 class SearchFragment : Fragment() {
+
+    private val tag = "SearchFragment"
 
     private var _binding: FragmentSearchBinding? = null
     private val binding get() = _binding
@@ -55,6 +61,7 @@ class SearchFragment : Fragment() {
             adapter = searchAdapter
             layoutManager = LinearLayoutManager(context)
             addOnScrollListener(scrollListener)
+            addOnItemTouchListener(touchListener)
         }
     }
 
@@ -109,6 +116,35 @@ class SearchFragment : Fragment() {
         }
     }
 
+    private val touchListener = object : RecyclerView.OnItemTouchListener {
+        override fun onInterceptTouchEvent(rv: RecyclerView, e: MotionEvent): Boolean {
+            if (e.action == MotionEvent.ACTION_DOWN) {
+                Log.d(tag, "onInterceptTouchEvent: ACTION_DOWN")
+                hideKeyBoard()
+            }
+            return false
+        }
+
+        override fun onTouchEvent(rv: RecyclerView, e: MotionEvent) {
+        }
+
+        override fun onRequestDisallowInterceptTouchEvent(disallowIntercept: Boolean) {
+        }
+    }
+
+    private fun hideKeyBoard() {
+        try {
+            val imm =
+                requireContext().getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+            val focusedView = activity?.currentFocus
+            if (focusedView != null) {
+                imm.hideSoftInputFromWindow(focusedView.windowToken, 0)
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+    }
+
     private val textWatcher = object : TextWatcher {
         override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {
 
@@ -128,6 +164,7 @@ class SearchFragment : Fragment() {
         _binding = null
         searchEditText?.removeTextChangedListener(textWatcher)
         searchRecyclerView?.removeOnScrollListener(scrollListener)
+        searchRecyclerView?.removeOnItemTouchListener(touchListener)
     }
 
     companion object {
