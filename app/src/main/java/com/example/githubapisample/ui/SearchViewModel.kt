@@ -25,17 +25,21 @@ class SearchViewModel(
 
     val searchUIStateFlow: StateFlow<SearchUIState> = _searchUIStateFlow.asStateFlow()
 
-    // 使用LinkedList，因remove first和last的時間複雜度為O(1)
+    /**
+     * 使用LinkedList，因remove first和last的時間複雜度為O(1)
+     */
     private val searchPages: LinkedList<Pair<Int, List<RepoData>>> = LinkedList()
 
     /**
-     * 使用Generator管理Task，避免衝突
+     * 使用Generator方式管理Task，避免衝突
+     * 使用方式大致上為，每次打字都會產生一個新的Generator(因狀態會重設)，並使用next去撈資料
+     * SearchMore會使用當前這個Generator去call next使用(因狀態會持續)
      */
     private var gitHubResponseGenerator: GitHubResponseGenerator? = null
 
 
     /**
-     * 使用已經實作好的debounce去包裝，避免過多的搜尋
+     * 使用已經實作好的debounce去包裝(避免過多的搜尋)，使用者只須思考自己想要的邏輯
      */
     val debounce = FunctionUtil.debounce(viewModelScope, SEARCH_DEBOUNCE_TIME)
 
@@ -46,12 +50,12 @@ class SearchViewModel(
     fun initialSearch(searchString: String) {
         debounce debounce@{
             if (searchString == "") return@debounce
-            gitHubResponseGenerator?.destroy()
+            gitHubResponseGenerator?.destroy() // 搜尋關鍵字為主要的搜尋條件，所以每次搜尋都會確保其他task被cancel
             updateLoadingUIState()
-            gitHubResponseGenerator = GitHubResponseGenerator(searchString)
+            gitHubResponseGenerator = GitHubResponseGenerator(searchString) // 產生新的Generator
             gitHubResponseGenerator?.next(SearchDirection.NONE, { _, response ->
                 searchPages.add(1 to response.repoResult.repoDataList)
-            })
+            }) // call next撈一筆資料
         }
     }
 
@@ -61,26 +65,24 @@ class SearchViewModel(
      * remove first和last的時間複雜度為O(1)，十分有效率
      */
     fun searchMore(searchDirection: SearchDirection) {
+        var onResponse: (Int, GitHubResponse.Success) -> Unit = { _, _ -> }
         if (searchDirection == SearchDirection.TOP) {
-            gitHubResponseGenerator?.next(searchDirection, { page, response ->
+            onResponse = { page, response ->
                 searchPages.addFirst(page to response.repoResult.repoDataList)
                 if (MAX_COUNT_THRESHOLD < searchPages.sumOf { it.second.size }) {
                     searchPages.removeLast()
                 }
-            })
-
+            }
         } else if (searchDirection == SearchDirection.BOTTOM) {
-
-            val onResponse: (Int, GitHubResponse.Success) -> Unit = { lastPage, response ->
-                Log.d(tag, "lastPage ${lastPage}")
+            onResponse = { lastPage, response ->
+                Log.d(tag, "lastPage $lastPage")
                 searchPages.add(lastPage to response.repoResult.repoDataList)
                 if (MAX_COUNT_THRESHOLD < searchPages.sumOf { it.second.size }) {
                     searchPages.removeFirst()
                 }
             }
-
-            gitHubResponseGenerator?.next(searchDirection, onResponse)
         }
+        gitHubResponseGenerator?.next(searchDirection, onResponse)
     }
 
 
@@ -113,6 +115,7 @@ class SearchViewModel(
 
     inner class GitHubResponseGenerator(private val input: String) {
         init {
+            // 被重新創建時會清掉舊的資料
             searchPages.clear()
         }
 
@@ -121,11 +124,14 @@ class SearchViewModel(
 
         private var searchJob: Job? = null
 
+        /**
+         * 使用已經實作好的lock去包裝，如當前還在處理，會無視新的搜尋
+         */
         private val lock = FunctionUtil.lock(viewModelScope)
 
         fun next(
             searchDirection: SearchDirection,
-            onSuccess: (Int, GitHubResponse.Success) -> Unit,
+            onSuccess: (Int, GitHubResponse.Success) -> Unit = { _, _ -> },
             onError: (GitHubResponse.Error) -> Unit = {}
         ) {
             val nextPage = when (searchDirection) {
@@ -144,7 +150,7 @@ class SearchViewModel(
 
             Log.d("safeSearchMoreBottom", "${searchDirection.name} $nextPage $isSearching")
 
-            if (nextPage == -1) return
+            if (nextPage == -1) return // 代表我當前算出來需要撈的頁數是不合理的，所以不撈
 
             searchJob = lock {
                 Log.d(tag, "searching $input ${Thread.currentThread()}")
@@ -187,14 +193,16 @@ class SearchViewModel(
             return lastPage * PER_PAGE_COUNT < totalCount
         }
 
-        // reduce boilerplate
-        suspend fun search(
+        /**
+         * 核心搜尋邏輯
+         */
+        private suspend fun search(
             query: String, perPage: Int, page: Int,
             onSuccess: (GitHubResponse.Success) -> Unit,
             onError: (GitHubResponse.Error) -> Unit = {}
         ) {
 
-            Log.d(tag, "searching ${query} ${perPage} ${page}")
+            Log.d(tag, "searching $query $perPage $page")
             val response = githubRepository.searchRepositories(
                 query,
                 perPage,
