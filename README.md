@@ -22,3 +22,5 @@
 如果您想要閱讀此程式碼，您可以直接clone此repository並切換到master branch
 
 ## App Stucture
+
+![Diagram](readmepics/GithubAoiSampleStructure.png)
