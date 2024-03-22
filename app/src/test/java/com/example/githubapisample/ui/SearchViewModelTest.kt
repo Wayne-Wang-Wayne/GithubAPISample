@@ -37,6 +37,10 @@ class SearchViewModelTest {
         searchViewModel = SearchViewModel(githubRepository)
     }
 
+    /**
+     * 驗證:
+     * initial search -> 在debounce時間內再次initial search -> 驗證第一次搜尋被取消，第二次搜尋結果回來且UIState正確更新
+     */
     @Test
     fun searchViewModel_initialSearchDebounceOccur_shouldCancelPreviousAndStartNext() = runTest {
         val diffTime = 300L
@@ -60,6 +64,11 @@ class SearchViewModelTest {
         assertEquals(searchUIStateThree.repositories[0].description, "ios1")
     }
 
+
+    /**
+     * 驗證:
+     * initial search -> 超過debounce時間 -> 在repository資料回來之前再次initial search -> 驗證第一次搜尋被取消，第二次搜尋結果回來且UIState正確更新
+     */
     @Test
     fun searchViewModel_initialSearchDebounceNotOccurButStartBeforeNextResultReturn_shouldCancelPreviousAndOnlyUpdateNextResult() = runTest {
         val searchUIStateFlow = searchViewModel.searchUIStateFlow
