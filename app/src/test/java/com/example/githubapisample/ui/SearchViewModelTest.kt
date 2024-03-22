@@ -153,16 +153,30 @@ class SearchViewModelTest {
         searchViewModel.initialSearch("android")
         advanceTimeBy(SEARCH_DEBOUNCE_TIME - 200) // 未超過debounce時間
         searchViewModel.searchMore(SearchDirection.BOTTOM)
-        advanceTimeBy(FAKE_REPOSITORY_SEARCH_TIME + makeSureCompleteBufferTime) // 來到searchMore回來的時間
-        // 確認searchMore被取消沒有回來
-        val searchUIStateOne = searchUIStateFlow.first()
-        assertEquals(StateType.LOADING, searchUIStateOne.stateType)
         advanceUntilIdle()
-        // 確認initial search結果有回來且update UIState，要確定是android第一頁結果
+        // 確認cancel search more且initial search結果有回來且update UIState，要確定是android第一頁結果
         val searchUIStateTwo = searchUIStateFlow.first()
         assertEquals(StateType.SUCCESS, searchUIStateTwo.stateType)
         assertEquals(searchUIStateTwo.repositories[0].description, "android1")
+    }
 
+    /**
+     * 驗證:
+     * initial search -> 超過debounce時間 -> 在repository資料回來之前SearchMore -> SearchMore會被擋住不會執行 -> 驗證UIState只有顯示initial search結果
+     */
+    @Test
+    fun searchViewModel_searchMoreBeforeInitialSearchDebounceNotOccur_shouldCancelSearchMore() = runTest {
+        searchViewModel.initialSearch("ios") //先偷塞一筆資料
+        advanceUntilIdle()
+        val searchUIStateFlow = searchViewModel.searchUIStateFlow
+        searchViewModel.initialSearch("android")
+        advanceTimeBy(SEARCH_DEBOUNCE_TIME + makeSureCompleteBufferTime) // 略過debounce時間
+        searchViewModel.searchMore(SearchDirection.BOTTOM)
+        advanceUntilIdle()
+        // 確認cancel search more且initial search結果有回來且update UIState，要確定是android第一頁結果
+        val searchUIStateTwo = searchUIStateFlow.first()
+        assertEquals(StateType.SUCCESS, searchUIStateTwo.stateType)
+        assertEquals(searchUIStateTwo.repositories[0].description, "android1")
     }
 
 }
