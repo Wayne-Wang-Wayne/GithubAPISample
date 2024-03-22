@@ -179,4 +179,23 @@ class SearchViewModelTest {
         assertEquals(searchUIStateTwo.repositories[0].description, "android1")
     }
 
+    /**
+     * 驗證:
+     * SearchMore -> 在repository資料回來之前進行initial search -> SearchMore會被cancel不會執行 -> 驗證UIState只有顯示initial search結果
+     */
+    @Test
+    fun searchViewModel_searchMoreThenInitialSearchBeforeResultReturn_shouldCancelSearchMore() = runTest {
+        searchViewModel.initialSearch("ios") //先偷塞一筆資料
+        advanceUntilIdle()
+        val searchUIStateFlow = searchViewModel.searchUIStateFlow
+        searchViewModel.searchMore(SearchDirection.BOTTOM)
+        advanceTimeBy(FAKE_REPOSITORY_SEARCH_TIME - 200) // 來到一個資料還未返回的時間點
+        searchViewModel.initialSearch("android")
+        advanceUntilIdle()
+        // 確認cancel search more且initial search結果有回來且update UIState，要確定是android第一頁結果
+        val searchUIStateTwo = searchUIStateFlow.first()
+        assertEquals(StateType.SUCCESS, searchUIStateTwo.stateType)
+        assertEquals(searchUIStateTwo.repositories[0].description, "android1")
+    }
+
 }
