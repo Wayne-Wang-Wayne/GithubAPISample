@@ -1,10 +1,10 @@
 # GithubAPISample
 
-能搜尋Github Repository的App
+能搜尋Github Repository的Android Native App
 
 ## Table of Contents
 
-- MVVM architectire
+- MVVM architecture
 - input text change searching(using debounced technique)
 - Infinite Scrolling(也有實現刪除過遠資料邏輯，實現真正infinite scrolling)
 - task conflict solving
