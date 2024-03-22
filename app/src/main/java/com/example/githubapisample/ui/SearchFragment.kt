@@ -52,7 +52,9 @@ class SearchFragment : Fragment() {
     }
 
     private fun setupView() {
-        searchEditText?.addTextChangedListener(textWatcher)
+        searchEditText?.apply {
+            post { addTextChangedListener(textWatcher) }
+        }
         searchRecyclerView?.apply {
             adapter = searchAdapter
             layoutManager = LinearLayoutManager(context)
