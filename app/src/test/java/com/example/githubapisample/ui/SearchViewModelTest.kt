@@ -198,4 +198,27 @@ class SearchViewModelTest {
         assertEquals(searchUIStateTwo.repositories[0].description, "android1")
     }
 
+    /**
+     * 驗證:
+     * SearchMore -> 在repository資料回來之後正確顯示SearchMore結果 -> initial search -> 驗證UIState正確顯示initial search結果
+     */
+    @Test
+    fun searchViewModel_searchMoreThenInitialSearchBothSuccess_shouldUpdateSearchMoreThenInitialSearch() = runTest {
+        searchViewModel.initialSearch("ios") //先偷塞一筆資料
+        advanceUntilIdle()
+        val searchUIStateFlow = searchViewModel.searchUIStateFlow
+        searchViewModel.searchMore(SearchDirection.BOTTOM)
+        advanceUntilIdle()
+        // 確認search more結果有回來且update UIState，要確定第二頁ios結果有被加上來
+        val searchUIStateOne = searchUIStateFlow.first()
+        assertEquals(StateType.SUCCESS, searchUIStateOne.stateType)
+        assertEquals("ios2", searchUIStateOne.repositories[1].description)
+        searchViewModel.initialSearch("android")
+        advanceUntilIdle()
+        // 確認initial search結果有回來且update UIState，要確定是android第一頁結果
+        val searchUIStateTwo = searchUIStateFlow.first()
+        assertEquals(StateType.SUCCESS, searchUIStateTwo.stateType)
+        assertEquals(searchUIStateTwo.repositories[0].description, "android1")
+    }
+
 }

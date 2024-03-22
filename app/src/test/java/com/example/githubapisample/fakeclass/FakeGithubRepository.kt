@@ -26,7 +26,7 @@ class FakeGithubRepository : GithubRepository {
                         1 -> {
                             GitHubResponse.Success(
                                 RepoResult(
-                                    totalCount = 1,
+                                    totalCount = 1000,
                                     repoDataList = listOf(
                                         RepoData(
                                             id = 1,
@@ -46,7 +46,7 @@ class FakeGithubRepository : GithubRepository {
                         2 -> {
                             GitHubResponse.Success(
                                 RepoResult(
-                                    totalCount = 2,
+                                    totalCount = 1000,
                                     repoDataList = listOf(
                                         RepoData(
                                             id = 2,
@@ -65,7 +65,7 @@ class FakeGithubRepository : GithubRepository {
                         else -> {
                             GitHubResponse.Success(
                                 RepoResult(
-                                    totalCount = 0,
+                                    totalCount = 1000,
                                     repoDataList = emptyList()
                                 )
                             )
@@ -78,7 +78,7 @@ class FakeGithubRepository : GithubRepository {
                         1 -> {
                             GitHubResponse.Success(
                                 RepoResult(
-                                    totalCount = 1,
+                                    totalCount = 1000,
                                     repoDataList = listOf(
                                         RepoData(
                                             id = 3,
@@ -98,7 +98,7 @@ class FakeGithubRepository : GithubRepository {
                         2 -> {
                             GitHubResponse.Success(
                                 RepoResult(
-                                    totalCount = 2,
+                                    totalCount = 1000,
                                     repoDataList = listOf(
                                         RepoData(
                                             id = 4,
@@ -118,7 +118,7 @@ class FakeGithubRepository : GithubRepository {
                         else -> {
                             GitHubResponse.Success(
                                 RepoResult(
-                                    totalCount = 0,
+                                    totalCount = 1000,
                                     repoDataList = emptyList()
                                 )
                             )
@@ -129,7 +129,7 @@ class FakeGithubRepository : GithubRepository {
                 else -> {
                     GitHubResponse.Success(
                         RepoResult(
-                            totalCount = 0,
+                            totalCount = 1000,
                             repoDataList = emptyList()
                         )
                     )
