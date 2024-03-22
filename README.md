@@ -23,4 +23,4 @@
 
 ## App Stucture
 
-![Diagram](readmepics/GithubAoiSampleStructure.png)
+![Diagram](readmepics/GithubSampleStructure.png)
