@@ -223,12 +223,32 @@ class SearchViewModelTest {
 
     /**
      * 驗證:
+     * SearchMore -> 在repository資料回來之前再次SearchMore-> 驗證第一次要成功，第二次要被擋掉
+     */
+    @Test
+    fun searchViewModel_searchMoreBeforeResultReturn_shouldCancelNextSearchMore() = runTest {
+        searchViewModel.initialSearch("ios") //先偷塞一筆資料
+        advanceUntilIdle()
+        val searchUIStateFlow = searchViewModel.searchUIStateFlow
+        searchViewModel.searchMore(SearchDirection.BOTTOM)
+        advanceTimeBy(FAKE_REPOSITORY_SEARCH_TIME - 200) // 來到一個資料還未返回的時間點
+        searchViewModel.searchMore(SearchDirection.BOTTOM)
+        advanceUntilIdle()
+        // 確認第一次search more結果有回來且加到第二頁且update UIState
+        val searchUIStateOne = searchUIStateFlow.first()
+        assertEquals(StateType.SUCCESS, searchUIStateOne.stateType)
+        assertEquals("ios2", searchUIStateOne.repositories[1].description)
+        assertEquals(searchUIStateOne.repositories.size, 2) // 也要確認沒有第三頁(因為應該要被取消)
+    }
+
+    /**
+     * 驗證:
      * 頁面滿了不再撈資料
      */
     @Test
     fun searchViewModel_searchMoreUntilFull_shouldNotFetchMoreData() = runTest {
         searchViewModel.initialSearch("ios") //先偷塞一筆資料
-        // 以下會故意讓第二筆的count超過MAX_COUNT_THRESHOLD
+        // 以下會故意讓第三筆的count超過MAX_COUNT_THRESHOLD
         advanceUntilIdle()
         searchViewModel.searchMore(SearchDirection.BOTTOM)
         advanceUntilIdle()
@@ -236,8 +256,12 @@ class SearchViewModelTest {
         assertEquals(searchViewModel.searchUIStateFlow.first().repositories.size, 2)
         searchViewModel.searchMore(SearchDirection.BOTTOM)
         advanceUntilIdle()
-        // 確認現在還是只有兩頁資料
-        assertEquals(searchViewModel.searchUIStateFlow.first().repositories.size, 2)
+        // 確認現在有第三頁資料
+        assertEquals(searchViewModel.searchUIStateFlow.first().repositories.size, 3)
+        searchViewModel.searchMore(SearchDirection.BOTTOM)
+        advanceUntilIdle()
+        // 確認現在有還是只有三頁資料
+        assertEquals(searchViewModel.searchUIStateFlow.first().repositories.size, 3)
     }
 
 }

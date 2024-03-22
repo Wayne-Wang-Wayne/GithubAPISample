@@ -62,6 +62,25 @@ class FakeGithubRepository : GithubRepository {
                                 )
                             )
                         }
+                        3 -> {
+                            GitHubResponse.Success(
+                                RepoResult(
+                                    totalCount = 1000,
+                                    repoDataList = listOf(
+                                        RepoData(
+                                            id = 3,
+                                            fullName = "google/android",
+                                            description = "android3",
+                                            updatedAt = "2021-01-01T00:00:00Z",
+                                            stargazersCountS = "1",
+                                            language = "Java",
+                                            avatarUrl = "https://avatars.githubusercontent.com/u/1342004?v=4",
+                                            repoUrl = ""
+                                        )
+                                    )
+                                )
+                            )
+                        }
                         else -> {
                             GitHubResponse.Success(
                                 RepoResult(
@@ -104,6 +123,25 @@ class FakeGithubRepository : GithubRepository {
                                             id = 4,
                                             fullName = "apple/ios",
                                             description = "ios2",
+                                            updatedAt = "2021-01-01T00:00:00Z",
+                                            stargazersCountS = "1",
+                                            language = "Swift",
+                                            avatarUrl = "https://avatars.githubusercontent.com/u/10639145?v=4",
+                                            repoUrl = ""
+                                        )
+                                    )
+                                )
+                            )
+                        }
+                        3 -> {
+                            GitHubResponse.Success(
+                                RepoResult(
+                                    totalCount = 1000,
+                                    repoDataList = listOf(
+                                        RepoData(
+                                            id = 5,
+                                            fullName = "apple/ios",
+                                            description = "ios3",
                                             updatedAt = "2021-01-01T00:00:00Z",
                                             stargazersCountS = "1",
                                             language = "Swift",
