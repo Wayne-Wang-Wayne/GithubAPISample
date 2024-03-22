@@ -31,7 +31,7 @@ class FakeGithubRepository : GithubRepository {
                                         RepoData(
                                             id = 1,
                                             fullName = "google/android",
-                                            description = "Android",
+                                            description = "android1",
                                             updatedAt = "2021-01-01T00:00:00Z",
                                             stargazersCountS = "1",
                                             language = "Java",
@@ -51,7 +51,7 @@ class FakeGithubRepository : GithubRepository {
                                         RepoData(
                                             id = 2,
                                             fullName = "google/android",
-                                            description = "Android",
+                                            description = "android2",
                                             updatedAt = "2021-01-01T00:00:00Z",
                                             stargazersCountS = "1",
                                             language = "Java",
@@ -83,7 +83,7 @@ class FakeGithubRepository : GithubRepository {
                                         RepoData(
                                             id = 3,
                                             fullName = "apple/ios",
-                                            description = "iOS",
+                                            description = "ios1",
                                             updatedAt = "2021-01-01T00:00:00Z",
                                             stargazersCountS = "1",
                                             language = "Swift",
@@ -103,7 +103,7 @@ class FakeGithubRepository : GithubRepository {
                                         RepoData(
                                             id = 4,
                                             fullName = "apple/ios",
-                                            description = "iOS",
+                                            description = "ios2",
                                             updatedAt = "2021-01-01T00:00:00Z",
                                             stargazersCountS = "1",
                                             language = "Swift",

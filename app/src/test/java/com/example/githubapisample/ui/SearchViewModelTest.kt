@@ -38,7 +38,7 @@ class SearchViewModelTest {
     }
 
     @Test
-    fun searchViewModel_debounceOccur_shouldCancelPreviousAndStartNext() = runTest {
+    fun searchViewModel_initialSearchDebounceOccur_shouldCancelPreviousAndStartNext() = runTest {
         val diffTime = 300L
         val searchUIStateFlow = searchViewModel.searchUIStateFlow
         searchViewModel.initialSearch("android")
@@ -57,7 +57,28 @@ class SearchViewModelTest {
         // 確認第二次的搜尋結果有回來，要確定是ios結果
         val searchUIStateThree = searchUIStateFlow.first()
         assertEquals(searchUIStateThree.stateType, StateType.SUCCESS)
-        assertEquals(searchUIStateThree.repositories[0].id, 3L)
+        assertEquals(searchUIStateThree.repositories[0].description, "ios1")
+    }
+
+    @Test
+    fun searchViewModel_initialSearchDebounceNotOccurButStartBeforeNextResultReturn_shouldCancelPreviousAndOnlyUpdateNextResult() = runTest {
+        val searchUIStateFlow = searchViewModel.searchUIStateFlow
+        searchViewModel.initialSearch("android")
+        advanceTimeBy(SEARCH_DEBOUNCE_TIME + makeSureCompleteBufferTime) // 略過debounce時間
+        // 確認第一次搜尋有Loading
+        val searchUIStateOne = searchUIStateFlow.first()
+        assertEquals(StateType.LOADING, searchUIStateOne.stateType)
+        searchViewModel.initialSearch("ios")
+        advanceTimeBy(FAKE_REPOSITORY_SEARCH_TIME + makeSureCompleteBufferTime) // 時間來到第一次結果回來的時間
+        // 確認第一次結果沒有回來
+        val searchUIStateTwo = searchUIStateFlow.first()
+        assertEquals(StateType.LOADING, searchUIStateTwo.stateType)
+        // 略過所有異步直到完成
+        advanceUntilIdle()
+        // 確認第二次的搜尋結果有回來，要確定是ios結果
+        val searchUIStateThree = searchUIStateFlow.first()
+        assertEquals(searchUIStateThree.stateType, StateType.SUCCESS)
+        assertEquals(searchUIStateThree.repositories[0].description, "ios1")
     }
 
 }
