@@ -21,6 +21,10 @@
 
 如果您想要閱讀此程式碼，您可以直接clone此repository並切換到master branch
 
-## App Stucture
+## App Structure
 
-![Diagram](readmepics/GithubSampleStructure.png)
+![Diagram](readmepics/GithubApiSampleStructure.png)
+
+## App Logic Flow
+
+![Diagram](readmepics/GithubApiSampleLogicFlow.png)
