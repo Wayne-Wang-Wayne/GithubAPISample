@@ -264,4 +264,54 @@ class SearchViewModelTest {
         assertEquals(searchViewModel.searchUIStateFlow.first().repositories.size, 3)
     }
 
+    /**
+     * 驗證:
+     * 不斷SearchMore直到超過MAX_COUNT_THRESHOLD，確認第一頁資料會被移除 -> 繼續往下搜 -> 驗證移除頭一筆 -> 網上搜 -> 驗證移除最後一筆
+     */
+    @Test
+    fun searchViewModel_searchMoreUntilFull_shouldRemoveFirstPageData() = runTest {
+        val searchUIStateFlow = searchViewModel.searchUIStateFlow
+        // 預計MAX_COUNT_THRESHOLD為10000筆，所以第四次會超過，第四次成功時理應自動刪掉第一筆
+        searchViewModel.initialSearch("tooMuch") //3000筆
+        advanceUntilIdle()
+        val searchUIStateOne = searchUIStateFlow.first()
+        assertEquals(searchUIStateOne.repositories.size, 3000)
+        assertEquals(searchUIStateOne.repositories.first().description, "tooMuch1") //第一筆是第一頁
+        assertEquals(searchUIStateOne.repositories.last().description, "tooMuch1") //最後一筆是第一頁
+        searchViewModel.searchMore(SearchDirection.BOTTOM) // 6000筆
+        advanceUntilIdle()
+        val searchUIStateTwo = searchUIStateFlow.first()
+        assertEquals(searchUIStateTwo.repositories.size, 6000)
+        assertEquals(searchUIStateTwo.repositories.first().description, "tooMuch1") //第一筆是第一頁
+        assertEquals(searchUIStateTwo.repositories.last().description, "tooMuch2") //最後一筆是第二頁
+        searchViewModel.searchMore(SearchDirection.BOTTOM) // 9000筆
+        advanceUntilIdle()
+        val searchUIStateThree = searchUIStateFlow.first()
+        assertEquals(searchUIStateThree.repositories.size, 9000)
+        assertEquals(searchUIStateThree.repositories.first().description, "tooMuch1") //第一筆是第一頁
+        assertEquals(searchUIStateThree.repositories.last().description, "tooMuch3") //最後一筆是第三頁
+        searchViewModel.searchMore(SearchDirection.BOTTOM) // 90000 + 3000 - 3000 = 9000筆
+        advanceUntilIdle()
+        // 確認新增最後一筆且第一筆資料被移除
+        val searchUIStateFour = searchUIStateFlow.first()
+        assertEquals(searchUIStateFour.repositories.size, 9000)
+        assertEquals(searchUIStateFour.repositories.first().description, "tooMuch2") //第一筆是第二頁
+        assertEquals(searchUIStateFour.repositories.last().description, "tooMuch4") //最後一筆是第四頁
+        searchViewModel.searchMore(SearchDirection.BOTTOM) // 90000 + 3000 - 3000 = 9000筆
+        advanceUntilIdle()
+        // 確認新增最後一筆且最後一筆資料被移除
+        val searchUIStateFive = searchUIStateFlow.first()
+        assertEquals(searchUIStateFive.repositories.size, 9000)
+        assertEquals(searchUIStateFive.repositories.first().description, "tooMuch3") //目前第一筆是第三頁
+        assertEquals(searchUIStateFive.repositories.last().description, "tooMuch5") //目前最後一筆是第五頁
+        // 往上滑
+        searchViewModel.searchMore(SearchDirection.TOP) // 90000 + 3000 - 3000 = 9000筆
+        advanceUntilIdle()
+        // 確認新增第一筆且最後一筆資料被移除
+        val searchUIStateSix = searchUIStateFlow.first()
+        assertEquals(searchUIStateSix.repositories.size, 9000)
+        assertEquals(searchUIStateSix.repositories.first().description, "tooMuch2") //目前第一筆是第二頁
+        assertEquals(searchUIStateSix.repositories.last().description, "tooMuch4") //目前最後一筆是第四頁
+    }
+
 }

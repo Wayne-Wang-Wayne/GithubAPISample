@@ -163,6 +163,28 @@ class FakeGithubRepository : GithubRepository {
                         }
                     }
                 }
+                "tooMuch" -> {
+                    val list = List(30) { currPage ->
+                        RepoResult(
+                            totalCount = 100000000,
+                            repoDataList = List(3000) {
+                                RepoData(
+                                    id = it.toLong(),
+                                    fullName = "google/android",
+                                    description = "tooMuch${currPage + 1}",
+                                    updatedAt = "2021-01-01T00:00:00Z",
+                                    stargazersCountS = "1",
+                                    language = "Java",
+                                    avatarUrl = "https://avatars.githubusercontent.com/u/1342004?v=4",
+                                    repoUrl = ""
+                                )
+                            }
+                        )
+                    }
+                    GitHubResponse.Success(
+                        list[page - 1]
+                    )
+                }
 
                 else -> {
                     GitHubResponse.Success(
