@@ -140,4 +140,29 @@ class SearchViewModelTest {
         assertEquals(searchUIStateTwo.errorMessage, "Error")
     }
 
+    /**
+     * 驗證:
+     * initial search -> 未超過debounce時間 ->  SearchMore -> initial search debounce時間到後會取消SearchMore -> 驗證UIState只有顯示initial search結果
+     */
+
+    @Test
+    fun searchViewModel_searchMoreBeforeInitialSearchDebounce_shouldCancelSearchMore() = runTest {
+        searchViewModel.initialSearch("ios") //先偷塞一筆資料
+        advanceUntilIdle()
+        val searchUIStateFlow = searchViewModel.searchUIStateFlow
+        searchViewModel.initialSearch("android")
+        advanceTimeBy(SEARCH_DEBOUNCE_TIME - 200) // 未超過debounce時間
+        searchViewModel.searchMore(SearchDirection.BOTTOM)
+        advanceTimeBy(FAKE_REPOSITORY_SEARCH_TIME + makeSureCompleteBufferTime) // 來到searchMore回來的時間
+        // 確認searchMore被取消沒有回來
+        val searchUIStateOne = searchUIStateFlow.first()
+        assertEquals(StateType.LOADING, searchUIStateOne.stateType)
+        advanceUntilIdle()
+        // 確認initial search結果有回來且update UIState，要確定是android第一頁結果
+        val searchUIStateTwo = searchUIStateFlow.first()
+        assertEquals(StateType.SUCCESS, searchUIStateTwo.stateType)
+        assertEquals(searchUIStateTwo.repositories[0].description, "android1")
+
+    }
+
 }
