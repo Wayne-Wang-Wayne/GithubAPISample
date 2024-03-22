@@ -104,7 +104,7 @@ class SearchViewModelTest {
         val searchUIStateOne = searchUIStateFlow.first()
         assertEquals(StateType.LOADING, searchUIStateOne.stateType)
         advanceTimeBy(FAKE_REPOSITORY_SEARCH_TIME + makeSureCompleteBufferTime) // 略過第一次搜尋時間
-        // 確認第一次搜尋結果有回來
+        // 確認第一次搜尋結果有回來，要確定是android結果
         val searchUIStateTwo = searchUIStateFlow.first()
         assertEquals(StateType.SUCCESS, searchUIStateTwo.stateType)
         assertEquals(searchUIStateTwo.repositories[0].description, "android1")
@@ -114,10 +114,30 @@ class SearchViewModelTest {
         val searchUIStateThree = searchUIStateFlow.first()
         assertEquals(StateType.LOADING, searchUIStateThree.stateType)
         advanceTimeBy(FAKE_REPOSITORY_SEARCH_TIME + makeSureCompleteBufferTime) // 略過第二次搜尋時間
-        // 確認第二次搜尋結果有回來
+        // 確認第二次搜尋結果有回來，要確定是ios結果
         val searchUIStateFour = searchUIStateFlow.first()
         assertEquals(StateType.SUCCESS, searchUIStateFour.stateType)
         assertEquals(searchUIStateFour.repositories[0].description, "ios1")
+    }
+
+    /**
+     * 驗證:
+     * initial search 發生錯誤 -> 驗證UIState正確更新
+     */
+    @Test
+    fun searchViewModel_initialSearchFailed_shouldUpdateErrorUIState() = runTest {
+        val searchUIStateFlow = searchViewModel.searchUIStateFlow
+        githubRepository.shouldReturnError = true
+        searchViewModel.initialSearch("android")
+        advanceTimeBy(SEARCH_DEBOUNCE_TIME + makeSureCompleteBufferTime) // 略過debounce時間
+        // 確認第一次搜尋有Loading
+        val searchUIStateOne = searchUIStateFlow.first()
+        assertEquals(StateType.LOADING, searchUIStateOne.stateType)
+        advanceTimeBy(FAKE_REPOSITORY_SEARCH_TIME + makeSureCompleteBufferTime) // 略過第一次搜尋時間
+        // 確認UIState正確更新成error
+        val searchUIStateTwo = searchUIStateFlow.first()
+        assertEquals(StateType.ERROR, searchUIStateTwo.stateType)
+        assertEquals(searchUIStateTwo.errorMessage, "Error")
     }
 
 }
