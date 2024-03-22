@@ -14,6 +14,10 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import java.util.LinkedList
 
+/**
+ * 詳細邏輯可以參考測試[SearchViewModelTest]
+ * 及Github上的readme: https://github.com/Wayne-Wang-Wayne/GithubAPISample
+ */
 class SearchViewModel(
     private val githubRepository: GithubRepository,
 ) : ViewModel() {
