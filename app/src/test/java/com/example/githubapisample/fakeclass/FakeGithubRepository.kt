@@ -65,7 +65,7 @@ class FakeGithubRepository : GithubRepository {
                         else -> {
                             GitHubResponse.Success(
                                 RepoResult(
-                                    totalCount = 1000,
+                                    totalCount = 10,
                                     repoDataList = emptyList()
                                 )
                             )
@@ -118,7 +118,7 @@ class FakeGithubRepository : GithubRepository {
                         else -> {
                             GitHubResponse.Success(
                                 RepoResult(
-                                    totalCount = 1000,
+                                    totalCount = 10,
                                     repoDataList = emptyList()
                                 )
                             )

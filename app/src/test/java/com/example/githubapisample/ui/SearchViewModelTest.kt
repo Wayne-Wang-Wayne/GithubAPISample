@@ -221,4 +221,23 @@ class SearchViewModelTest {
         assertEquals(searchUIStateTwo.repositories[0].description, "android1")
     }
 
+    /**
+     * 驗證:
+     * 頁面滿了不再撈資料
+     */
+    @Test
+    fun searchViewModel_searchMoreUntilFull_shouldNotFetchMoreData() = runTest {
+        searchViewModel.initialSearch("ios") //先偷塞一筆資料
+        // 以下會故意讓第二筆的count超過MAX_COUNT_THRESHOLD
+        advanceUntilIdle()
+        searchViewModel.searchMore(SearchDirection.BOTTOM)
+        advanceUntilIdle()
+        // 確認現在有第兩頁資料
+        assertEquals(searchViewModel.searchUIStateFlow.first().repositories.size, 2)
+        searchViewModel.searchMore(SearchDirection.BOTTOM)
+        advanceUntilIdle()
+        // 確認現在還是只有兩頁資料
+        assertEquals(searchViewModel.searchUIStateFlow.first().repositories.size, 2)
+    }
+
 }
