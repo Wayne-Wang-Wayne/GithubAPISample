@@ -235,7 +235,7 @@ private const val MAX_COUNT_THRESHOLD = 10000
 
 private const val PER_PAGE_COUNT = 100
 
-private const val SEARCH_DEBOUNCE_TIME = 500L
+const val SEARCH_DEBOUNCE_TIME = 500L
 
 const val SCROLLING_THRESHOLD = 200
 

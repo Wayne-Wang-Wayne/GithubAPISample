@@ -15,6 +15,7 @@ material = "1.11.0"
 activity = "1.8.2"
 constraintlayout = "2.1.4"
 materialVersion = "1.11.0"
+mockk-mockkAndroid = "1.13.10"
 retrofit = "2.10.0"
 
 [libraries]
@@ -34,6 +35,7 @@ material = { group = "com.google.android.material", name = "material", version.r
 androidx-activity = { group = "androidx.activity", name = "activity", version.ref = "activity" }
 androidx-constraintlayout = { group = "androidx.constraintlayout", name = "constraintlayout", version.ref = "constraintlayout" }
 material-v150 = { module = "com.google.android.material:material", version.ref = "materialVersion" }
+mockk-mockk-android = { module = "io.mockk:mockk-android", version.ref = "mockk-mockkAndroid" }
 retrofit = { module = "com.squareup.retrofit2:retrofit", version.ref = "retrofit" }
 
 [plugins]
