@@ -6,6 +6,10 @@ import androidx.fragment.app.testing.withFragment
 import androidx.lifecycle.Lifecycle
 import androidx.recyclerview.widget.RecyclerView
 import androidx.test.espresso.Espresso.onView
+import androidx.test.espresso.action.ViewActions
+import androidx.test.espresso.action.ViewActions.click
+import androidx.test.espresso.action.ViewActions.swipeDown
+import androidx.test.espresso.action.ViewActions.swipeUp
 import androidx.test.espresso.action.ViewActions.typeText
 import androidx.test.espresso.assertion.ViewAssertions.matches
 import androidx.test.espresso.contrib.RecyclerViewActions
@@ -87,7 +91,7 @@ class SearchFragmentUITest {
         // 驗證輸入的文字是否已設置到 EditText 中
         editText.check(matches(withText("a")))
         // 驗證鍵盤是否已打開
-        assert(isKeyboardOpenedShellCheck())
+        assert(isKeyboardOpened())
     }
 
     /**
@@ -103,6 +107,47 @@ class SearchFragmentUITest {
             RecyclerViewActions.scrollToPosition<RecyclerView.ViewHolder>(10)
         )
         recyclerView.check(matches(withViewAtPosition(10, hasDescendant(withText("fullName10")))))
+        recyclerView.check(matches(withViewAtPosition(10, hasDescendant(withText("description10")))))
+        recyclerView.check(matches(withViewAtPosition(10, hasDescendant(withText("stargazersCountS10")))))
+        recyclerView.check(matches(withViewAtPosition(10, hasDescendant(withText("language10")))))
+    }
+
+    /**
+     * 驗證：碰觸recyclerView時鍵盤應該關閉
+     */
+    @Test
+    fun searchFragmentUITest_swipeDown_shouldHideKeyboard() {
+        editText.perform(typeText("an"))
+        // 驗證鍵盤是否已打開
+        assert(isKeyboardOpened())
+        recyclerView.perform(swipeDown())
+        // 驗證鍵盤是否已關閉
+        assert(!isKeyboardOpened())
+    }
+
+    /**
+     * 驗證：當滑動到底部時，如有更多資料進入，應該可以繼續滑到底部，並顯示正確卡片
+     */
+    @Test
+    fun searchFragmentUITest_goToBottomThenGotMoreData_shouldBeAbleToScrollMore() {
+        editText.perform(typeText("an"))
+        recyclerView.perform(swipeDown())
+        recyclerView.perform(
+            RecyclerViewActions.scrollToPosition<RecyclerView.ViewHolder>(19)
+        )
+        recyclerView.check(matches(withViewAtPosition(19, hasDescendant(withText("fullName19")))))
+        recyclerView.check(matches(withViewAtPosition(19, hasDescendant(withText("description19")))))
+        recyclerView.check(matches(withViewAtPosition(19, hasDescendant(withText("stargazersCountS19")))))
+        recyclerView.check(matches(withViewAtPosition(19, hasDescendant(withText("language19")))))
+        editText.perform(typeText("d")) // 拿到更多資料
+        recyclerView.perform(
+            RecyclerViewActions.scrollToPosition<RecyclerView.ViewHolder>(39)
+        )
+        recyclerView.check(matches(withViewAtPosition(39, hasDescendant(withText("fullName39")))))
+        recyclerView.check(matches(withViewAtPosition(39, hasDescendant(withText("description39")))))
+        recyclerView.check(matches(withViewAtPosition(39, hasDescendant(withText("stargazersCountS39")))))
+        recyclerView.check(matches(withViewAtPosition(39, hasDescendant(withText("language39"))))
+        )
     }
 
     private fun createFakeData(count: Int): List<RepoData> {
@@ -120,7 +165,7 @@ class SearchFragmentUITest {
         }
     }
 
-    private fun isKeyboardOpenedShellCheck(): Boolean {
+    private fun isKeyboardOpened(): Boolean {
         val checkKeyboardCmd = "dumpsys input_method | grep mInputShown"
 
         try {
@@ -153,12 +198,14 @@ class SearchFragmentUITest {
                     repositories = createFakeData(20)
                 )
             }
-            every { searchViewModel.searchMore(SearchDirection.BOTTOM) } answers {
+            every { searchViewModel.initialSearch("and") } answers {
                 searchUIStateFlow.value = searchUIStateFlow.value.copy(
                     stateType = StateType.SUCCESS,
                     repositories = createFakeData(40)
                 )
             }
+            every { searchViewModel.searchMore(SearchDirection.BOTTOM) } answers {}
+            every { searchViewModel.searchMore(SearchDirection.TOP) } answers {}
         }
 
         scenario.moveToState(Lifecycle.State.RESUMED)
