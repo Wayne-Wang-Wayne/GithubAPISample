@@ -78,5 +78,6 @@ dependencies {
     androidTestImplementation(libs.androidx.espresso.core.v340)
     androidTestImplementation(libs.androidx.runner)
     androidTestImplementation(libs.androidx.rules)
+    androidTestImplementation(libs.androidx.uiautomator)
     debugImplementation(libs.androidx.fragment.testing)
 }

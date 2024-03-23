@@ -20,6 +20,7 @@ mockk-mockkAndroid = "1.13.10"
 retrofit = "2.10.0"
 rules = "1.5.0"
 runner = "1.5.2"
+uiautomator = "2.3.0"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -30,6 +31,7 @@ androidx-lifecycle-runtime-ktx = { module = "androidx.lifecycle:lifecycle-runtim
 androidx-lifecycle-viewmodel-ktx = { module = "androidx.lifecycle:lifecycle-viewmodel-ktx", version.ref = "lifecycleRuntimeKtx" }
 androidx-rules = { module = "androidx.test:rules", version.ref = "rules" }
 androidx-runner = { module = "androidx.test:runner", version.ref = "runner" }
+androidx-uiautomator = { module = "androidx.test.uiautomator:uiautomator", version.ref = "uiautomator" }
 converter-gson = { module = "com.squareup.retrofit2:converter-gson", version.ref = "retrofit" }
 implementation_io-coil = { module = "io.coil-kt:coil", version.ref = "implementation_io-coil" }
 insert-koin-koin-android = { module = "io.insert-koin:koin-android", version.ref = "insert-koin-koinAndroid" }
