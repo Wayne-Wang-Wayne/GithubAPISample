@@ -74,4 +74,14 @@ class GitHubRepositoryImplTest {
         assertEquals((result as GitHubResponse.Error).message, "Failed to fetch data: response body is null")
     }
 
+    @Test
+    fun gitHubRepositoryImplTest_searchRepositoriesCancelException_shouldGetCancelGitHubResponse() = testScope.runTest {
+        // Given
+        fakeGitHubApiService.forceCancelException = true
+        // When
+        val result = gitHubRepositoryImpl.searchRepositories("query", 1, 1)
+        // Then
+        Assert.assertTrue(result is GitHubResponse.Cancel)
+    }
+
 }
