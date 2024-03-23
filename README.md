@@ -9,7 +9,8 @@
 - Infinite Scrolling(也有實現刪除過遠資料邏輯，實現真正infinite scrolling)
 - task conflict solving
 - DI using Koin
-- Testing
+- UI Test
+- Unit Test
 - Coroutine
 - Retrofit
 
