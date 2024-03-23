@@ -71,8 +71,12 @@ dependencies {
     testImplementation(libs.kotlinx.coroutines.test)
     testImplementation(libs.junit)
     testImplementation(libs.mockk.mockk.android)
+    androidTestImplementation(libs.kotlinx.coroutines.test)
     androidTestImplementation(libs.mockk.mockk.android)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
+    androidTestImplementation(libs.androidx.espresso.core.v340)
+    androidTestImplementation(libs.androidx.runner)
+    androidTestImplementation(libs.androidx.rules)
     debugImplementation(libs.androidx.fragment.testing)
 }
